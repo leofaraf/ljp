@@ -1,0 +1,54 @@
+use diesel::prelude::*;
+use serde::{Deserialize, Serialize};
+use chrono::NaiveDate;
+
+use crate::schema::{users, notes};
+
+// -------- USERS --------
+
+#[derive(Queryable, Identifiable, Serialize, Clone)]
+#[diesel(table_name = users)]
+pub struct User {
+    pub id: i32,
+    pub username: String,
+    pub password_hash: String,
+    pub token: Option<String>,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = users)]
+pub struct NewUser {
+    pub username: String,
+    pub password_hash: String,
+}
+
+// -------- NOTES --------
+
+#[derive(Queryable, Identifiable, Associations, Serialize)]
+#[diesel(table_name = notes)]
+#[diesel(belongs_to(User))]
+pub struct Note {
+    pub id: i32,
+    pub user_id: i32,
+    pub note_date: NaiveDate,
+    pub content: String,
+}
+
+#[derive(Insertable, Deserialize)]
+#[diesel(table_name = notes)]
+pub struct NewNote {
+    pub user_id: i32,
+    pub note_date: NaiveDate,
+    pub content: String,
+}
+
+#[derive(serde::Deserialize)]
+pub struct NewNoteInput {
+    pub note_date: NaiveDate,
+    pub content: String,
+}
+
+#[derive(Deserialize)]
+pub struct UpdateNote {
+    pub content: String,
+}
