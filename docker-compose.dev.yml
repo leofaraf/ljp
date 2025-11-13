@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    depends_on:
+      db
+    environment:
+      DATABASE_URL: postgres://myuser:mypassword@db:5432/mydatabase
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_IDS: ${TELEGRAM_CHAT_IDS}
+    expose:
+      - "3000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80" # main entry point
+    volumes:
+      - frontend_cache:/usr/share/nginx/html
+
+volumes:
+  db_data:
+  frontend_cache:

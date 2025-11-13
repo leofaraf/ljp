@@ -31,7 +31,7 @@ export default function OverviewPage() {
   // Fetch and filter notes by date range
   useEffect(() => {
     if (!dateRange.from || !dateRange.to) return
-    fetch("http://127.0.0.1:3000/notes/days", {
+    fetch(`${import.meta.env.VITE_API_URL}/notes/days`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => (res.ok ? res.json() : []))
@@ -42,7 +42,7 @@ export default function OverviewPage() {
         })
         const results = []
         for (const d of filtered) {
-          const res = await fetch(`http://127.0.0.1:3000/notes/${d}`, {
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/notes/${d}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           if (res.ok) {

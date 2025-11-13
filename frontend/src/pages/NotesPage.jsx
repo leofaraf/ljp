@@ -10,7 +10,7 @@ export default function NotesPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://127.0.0.1:3000/notes/days", {
+    fetch(`${import.meta.env.VITE_API_URL}/notes/days`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => (res.ok ? res.json() : []))

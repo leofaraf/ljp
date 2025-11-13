@@ -2,6 +2,9 @@ mod schema;
 mod models;
 mod tgbot;
 mod config;
+// mod migrations;
+
+use std::error::Error;
 
 use axum::{
     routing::{get, post, delete, put},
@@ -13,6 +16,7 @@ use axum::{
 };
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
+use diesel_migrations::MigrationHarness;
 use dotenvy::dotenv;
 use tower_http::cors::{Any, CorsLayer};
 use uuid::Uuid;
@@ -75,6 +79,12 @@ async fn main() {
 
     let manager = ConnectionManager::<PgConnection>::new(database_url);
     let pool = Pool::builder().build(manager).unwrap();
+
+    // let mut conn = pool.get()
+    //     .expect("DB connection failed");
+
+    // conn.run_pending_migrations(migrations::MIGRATIONS)
+    //     .expect("Migration run failed");
 
     let state = AppState { pool };
 

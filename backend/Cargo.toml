@@ -23,3 +23,4 @@ dotenvy = "0.15"
 teloxide = { version = "0.13", features = ["macros", "ctrlc_handler"] }
 diesel = { version = "2", features = ["postgres", "r2d2", "chrono"] }
 pq-sys = { version = "0.7.5", features = ["bundled_without_openssl"] }
+diesel_migrations = "2.3.0"

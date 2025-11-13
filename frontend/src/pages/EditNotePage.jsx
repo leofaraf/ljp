@@ -15,7 +15,7 @@ export default function EditNotePage() {
 
   // Load existing note (if any)
   useEffect(() => {
-    fetch(`http://127.0.0.1:3000/notes/${date}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/notes/${date}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -39,7 +39,7 @@ export default function EditNotePage() {
 
   async function handleSave() {
     const method = exists ? "PUT" : "POST";
-    const res = await fetch("http://127.0.0.1:3000/notes", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/notes`, {
       method,
       headers: {
         "Content-Type": "application/json",
@@ -56,7 +56,7 @@ export default function EditNotePage() {
 
   async function handleDelete() {
     if (!window.confirm("Delete this note?")) return;
-    const res = await fetch(`http://127.0.0.1:3000/notes/${date}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/notes/${date}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
