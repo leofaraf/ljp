@@ -1,36 +1,17 @@
-version: "3.8"
+version: '3'
 
 services:
   db:
-    image: postgres:16
+    image: postgres:16 # Use a specific PostgreSQL version
     restart: always
     environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
-  backend:
-    build: ./backend
-    depends_on:
-      db
-    environment:
-      DATABASE_URL: postgres://myuser:mypassword@db:5432/mydatabase
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-      TELEGRAM_CHAT_IDS: ${TELEGRAM_CHAT_IDS}
-    expose:
-      - "3000"
-
-  frontend:
-    build: ./frontend
-    depends_on:
-      - backend
+      POSTGRES_DB: mydatabase # Name of the database
+      POSTGRES_USER: myuser # Username for the database
+      POSTGRES_PASSWORD: mypassword # Password for the database user
     ports:
-      - "80:80" # main entry point
+      - "5432:5432" # Maps host port 5432 to container port 5432
     volumes:
-      - frontend_cache:/usr/share/nginx/html
+      - db_data:/var/lib/postgresql/data # Persists database data
 
 volumes:
-  db_data:
-  frontend_cache:
+  db_data: # Define the named volume for data persistencedocker volume inspect db_data

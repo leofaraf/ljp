@@ -123,8 +123,13 @@ async fn main() {
 
     println!("🚀 Server running at http://127.0.0.1:3000");
 
+    let host = std::env::var("BIND_HOST").unwrap_or("127.0.0.1".into());
+    let port = std::env::var("BIND_PORT").unwrap_or("3000".into());
+
+    let addr = format!("{}:{}", host, port);
+
     axum::serve(
-        tokio::net::TcpListener::bind("127.0.0.1:3000")
+        tokio::net::TcpListener::bind(addr)
             .await
             .unwrap(),
         app,

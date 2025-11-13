@@ -1,0 +1,35 @@
+# === Rust build ===
+target/
+Cargo.lock
+
+# === Git ===
+.git/
+.gitignore
+
+# === Editors ===
+.vscode/
+.idea/
+
+# === Logs ===
+*.log
+logs/
+tmp/
+
+# === Docker ===
+docker-compose.yml
+docker-compose.dev.yml
+.dockerignore
+
+# === Env ===
+.env
+.env.*
+
+# === Node (if any) ===
+node_modules/
+dist/
+
+# === Database (common mistake!) ===
+db_data/
+postgres_data/
+**/db_data/
+**/postgres_data/
