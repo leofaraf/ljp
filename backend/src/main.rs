@@ -1,5 +1,7 @@
 mod schema;
 mod models;
+mod tgbot;
+mod config;
 
 use axum::{
     routing::{get, post, delete, put},
@@ -24,6 +26,7 @@ use crate::schema::{users, notes};
 use crate::models::*;
 
 type DbPool = Pool<ConnectionManager<PgConnection>>;
+type HandleResult<T> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
 #[derive(Clone)]
 struct AppState {
@@ -74,6 +77,14 @@ async fn main() {
     let pool = Pool::builder().build(manager).unwrap();
 
     let state = AppState { pool };
+
+    tokio::spawn(tgbot::start_bot(state.clone()));
+    tokio::spawn({
+        let state = state.clone();
+        async move {
+            tgbot::start_daily_backups(state).await;
+        }
+    });
 
     let cors = CorsLayer::new()
         .allow_origin(Any)

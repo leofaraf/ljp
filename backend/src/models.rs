@@ -6,7 +6,7 @@ use crate::schema::{users, notes};
 
 // -------- USERS --------
 
-#[derive(Queryable, Identifiable, Serialize, Clone)]
+#[derive(Queryable, Insertable, Identifiable, Serialize, Deserialize, Clone, Debug)]
 #[diesel(table_name = users)]
 pub struct User {
     pub id: i32,
@@ -24,7 +24,7 @@ pub struct NewUser {
 
 // -------- NOTES --------
 
-#[derive(Queryable, Identifiable, Associations, Serialize)]
+#[derive(Queryable, Insertable, Identifiable, Associations, Serialize, Deserialize)]
 #[diesel(table_name = notes)]
 #[diesel(belongs_to(User))]
 pub struct Note {
