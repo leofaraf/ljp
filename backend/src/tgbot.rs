@@ -6,7 +6,7 @@ use teloxide::{
 use diesel::prelude::*;
 use tokio::time::interval;
 use crate::{
-    AppState, HandleResult, config, models::{NewNote, Note, User}, schema::{notes, users}
+    AppState, HandleResult, config, models::{NamedNote, NewNote, Note, User}, schema::{named_notes, notes, users}
 };
 use chrono::{Local, NaiveDate};
 use serde::{Serialize, Deserialize};
@@ -17,6 +17,7 @@ use serde::{Serialize, Deserialize};
 struct DbExport {
     users: Vec<User>,
     notes: Vec<Note>,
+    named_notes: Vec<NamedNote>,
 }
 
 #[derive(BotCommands, Clone)]
@@ -97,10 +98,12 @@ pub async fn handle_export(bot: Bot, msg: Message, state: AppState) -> HandleRes
     // ----- Load everything -----
     let all_users: Vec<User> = users::table.load(&mut conn)?;
     let all_notes: Vec<Note> = notes::table.load(&mut conn)?;
+    let all_named: Vec<NamedNote> = named_notes::table.load(&mut conn)?;
 
     let dump = DbExport {
         users: all_users,
         notes: all_notes,
+        named_notes: all_named,
     };
 
     // ----- Serialize -----
@@ -144,6 +147,7 @@ pub async fn handle_import_file(
     let mut conn = state.pool.get()?;
 
     // ---- WIPE OLD DATA ---- //
+    diesel::delete(named_notes::table).execute(&mut conn)?;
     diesel::delete(notes::table).execute(&mut conn)?;
     diesel::delete(users::table).execute(&mut conn)?;
 
@@ -155,6 +159,11 @@ pub async fn handle_import_file(
     // ---- INSERT NOTES ---- //
     diesel::insert_into(notes::table)
         .values(&imported.notes)
+        .execute(&mut conn)?;
+
+    // ---- INSERT NAMED NOTES ---- //
+    diesel::insert_into(named_notes::table)
+        .values(&imported.named_notes)
         .execute(&mut conn)?;
 
     // ---- DONE ---- //
@@ -181,7 +190,7 @@ fn export_filename() -> String {
 }
 
 pub async fn run_daily_export(state: AppState) -> HandleResult<()> {
-    use crate::schema::{users, notes};
+    use crate::schema::{users, notes, named_notes};
     let bot = Bot::new(config::load_tgbot_token());
     let chat_ids = config::load_allowed_chat_ids(); // same list used by commands
 
@@ -190,10 +199,12 @@ pub async fn run_daily_export(state: AppState) -> HandleResult<()> {
     // ----- Load everything (IDENTICAL to handle_export) -----
     let all_users: Vec<User> = users::table.load(&mut conn)?;
     let all_notes: Vec<Note> = notes::table.load(&mut conn)?;
+    let all_named: Vec<NamedNote> = named_notes::table.load(&mut conn)?;
 
     let dump = DbExport {
         users: all_users,
         notes: all_notes,
+        named_notes: all_named,
     };
 
     // ----- Serialize (IDENTICAL) -----
