@@ -5,24 +5,28 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function EditNotePage() {
+const apiBase = import.meta.env.VITE_MC1_URL || import.meta.env.VITE_API_URL;
+
+export default function EditNamedNotePage() {
   const { token } = useAuth();
-  const { date } = useParams();
+  const { name } = useParams();
   const navigate = useNavigate();
+  const decodedName = decodeURIComponent(name || "");
+
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [exists, setExists] = useState(false);
 
-  // Load existing entry (if any)
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/logbook/${date}`, {
+    if (!decodedName) return;
+    fetch(`${apiBase}/notes/${encodeURIComponent(decodedName)}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
         if (res.status === 404) {
           setExists(false);
           setLoading(false);
-          return;
+          return null;
         }
         if (!res.ok) throw new Error();
         return res.json();
@@ -35,20 +39,29 @@ export default function EditNotePage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [date, token]);
+  }, [decodedName, token]);
 
   async function handleSave() {
+    if (!decodedName.trim()) return;
     const method = exists ? "PUT" : "POST";
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/logbook`, {
+    const url = exists
+      ? `${apiBase}/notes/${encodeURIComponent(decodedName)}`
+      : `${apiBase}/notes`;
+    const body = exists
+      ? { content }
+      : { name: decodedName, content };
+
+    const res = await fetch(url, {
       method,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ note_date: date, content }),
+      body: JSON.stringify(body),
     });
+
     if (res.ok) {
-      navigate("/logbook");
+      navigate("/notes");
     } else {
       alert("Error saving note");
     }
@@ -56,33 +69,37 @@ export default function EditNotePage() {
 
   async function handleDelete() {
     if (!window.confirm("Delete this note?")) return;
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/logbook/${date}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) navigate("/logbook");
+    const res = await fetch(
+      `${apiBase}/notes/${encodeURIComponent(decodedName)}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (res.ok) navigate("/notes");
   }
 
+  if (!decodedName) return <p>Missing note name.</p>;
   if (loading) return <p>Loading...</p>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Logbook Notes – {date}</h1>
+      <h1 className="text-2xl font-bold mb-4">Note: {decodedName}</h1>
       <Card className="p-4 space-y-4">
         <Textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Write your notes..."
+          placeholder="Write your note..."
           rows={10}
         />
         <div className="flex gap-2">
-          <Button onClick={handleSave}>{exists ? "Update Note" : "Create Note"}</Button>
+          <Button onClick={handleSave}>{exists ? "Update" : "Create"}</Button>
           {exists && (
             <Button variant="destructive" onClick={handleDelete}>
               Delete
             </Button>
           )}
-          <Button variant="outline" onClick={() => navigate("/logbook")}>
+          <Button variant="outline" onClick={() => navigate("/notes")}>
             Back
           </Button>
         </div>

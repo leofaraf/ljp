@@ -34,7 +34,7 @@ pub struct Note {
     pub content: String,
 }
 
-#[derive(Insertable, Deserialize)]
+#[derive(Insertable, Deserialize, Debug)]
 #[diesel(table_name = notes)]
 pub struct NewNote {
     pub user_id: i32,
@@ -50,5 +50,6 @@ pub struct NewNoteInput {
 
 #[derive(Deserialize)]
 pub struct UpdateNote {
+    pub note_date: NaiveDate,
     pub content: String,
 }

@@ -1,59 +1,58 @@
-import { useEffect, useState } from "react"
-import { useAuth } from "../auth/AuthContext"
-import { format, addDays } from "date-fns"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { useEffect, useState } from "react";
+import { useAuth } from "../auth/AuthContext";
+import { format, addDays } from "date-fns";
+import { Card } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
-import { getRange } from "../lib/date"
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { getRange } from "../lib/date";
 
 export default function OverviewPage() {
-  const { token } = useAuth()
-  const [mode, setMode] = useState("week")
-  const [notes, setNotes] = useState([])
+  const { token } = useAuth();
+  const [mode, setMode] = useState("week");
+  const [notes, setNotes] = useState([]);
   const [dateRange, setDateRange] = useState({
     from: new Date(),
     to: addDays(new Date(), 7),
-  })
+  });
 
   // Update range automatically when mode changes
   useEffect(() => {
-    const [from, to] = getRange(mode)
-    setDateRange({ from, to })
-  }, [mode])
+    const [from, to] = getRange(mode);
+    setDateRange({ from, to });
+  }, [mode]);
 
-  // Fetch and filter notes by date range
+  // Fetch and filter logbook entries by date range
   useEffect(() => {
-    if (!dateRange.from || !dateRange.to) return
-    fetch(`${import.meta.env.VITE_API_URL}/notes/days`, {
+    if (!dateRange.from || !dateRange.to) return;
+    fetch(`${import.meta.env.VITE_API_URL}/logbook/days`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => (res.ok ? res.json() : []))
       .then(async (dates) => {
         const filtered = dates.filter((d) => {
-          const date = new Date(d)
-          return date >= dateRange.from && date <= dateRange.to
-        })
-        const results = []
+          const date = new Date(d);
+          return date >= dateRange.from && date <= dateRange.to;
+        });
+        const results = [];
         for (const d of filtered) {
-          const res = await fetch(`${import.meta.env.VITE_API_URL}/notes/${d}`, {
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/logbook/${d}`, {
             headers: { Authorization: `Bearer ${token}` },
-          })
+          });
           if (res.ok) {
-            const note = await res.json()
-            results.push(note)
+            const note = await res.json();
+            results.push(note);
           }
         }
-        setNotes(results)
+        setNotes(results);
       })
-      .catch(() => setNotes([]))
-  }, [dateRange, token])
+      .catch(() => setNotes([]));
+  }, [dateRange, token]);
 
   return (
     <div>
@@ -87,12 +86,11 @@ export default function OverviewPage() {
 
       <Card className="p-4">
         <h2 className="text-lg font-semibold mb-2">
-          Notes ({format(dateRange.from, "MMM d")} →{" "}
-          {format(dateRange.to, "MMM d, yyyy")})
+          Logbook ({format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d, yyyy")})
         </h2>
 
         {notes.length === 0 ? (
-          <p className="text-gray-500">No notes in this period.</p>
+          <p className="text-gray-500">No logbook entries in this period.</p>
         ) : (
           <div className="space-y-4">
             {notes.map((note) => (
@@ -109,5 +107,5 @@ export default function OverviewPage() {
         )}
       </Card>
     </div>
-  )
+  );
 }

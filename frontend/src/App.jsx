@@ -7,6 +7,8 @@ import NotesPage from "./pages/NotesPage"
 import MainLayout from "./layout/MainLayout"
 import EditNotePage from "./pages/EditNotePage"
 import OverviewPage from "./pages/OverviewPage"
+import NamedNotesPage from "./pages/NamedNotesPage"
+import EditNamedNotePage from "./pages/EditNamedNotePage"
 
 export default function App() {
   const { token } = useAuth()
@@ -26,8 +28,10 @@ export default function App() {
       <Routes>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/overview" element={<OverviewPage />} />
-        <Route path="/notes" element={<NotesPage />} />
-        <Route path="/notes/:date" element={<EditNotePage />} />
+        <Route path="/logbook" element={<NotesPage />} />
+        <Route path="/logbook/:date" element={<EditNotePage />} />
+        <Route path="/notes" element={<NamedNotesPage />} />
+        <Route path="/notes/:name" element={<EditNamedNotePage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </MainLayout>

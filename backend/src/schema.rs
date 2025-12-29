@@ -1,6 +1,16 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    named_notes (id) {
+        id -> Int4,
+        user_id -> Int4,
+        name -> Text,
+        content -> Text,
+        created_at -> Nullable<Timestamptz>,
+    }
+}
+
+diesel::table! {
     notes (id) {
         id -> Int4,
         user_id -> Int4,
@@ -18,6 +28,7 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(named_notes -> users (user_id));
 diesel::joinable!(notes -> users (user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(notes, users,);
+diesel::allow_tables_to_appear_in_same_query!(named_notes, notes, users,);

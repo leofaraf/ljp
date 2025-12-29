@@ -19,6 +19,7 @@ use diesel::r2d2::{ConnectionManager, Pool};
 use diesel_migrations::MigrationHarness;
 use dotenvy::dotenv;
 use tower_http::cors::{Any, CorsLayer};
+use tracing::info;
 use uuid::Uuid;
 use argon2::{
     Argon2, PasswordHash, PasswordVerifier, PasswordHasher,
@@ -107,9 +108,9 @@ async fn main() {
 
     let protected = Router::new()
         .route("/me", get(me))
-        .route("/notes", post(create_note).put(update_note))
-        .route("/notes/days", get(list_note_days))
-        .route("/notes/{date}", get(get_note).delete(delete_note))
+        .route("/logbook", post(create_note).put(update_note))
+        .route("/logbook/days", get(list_note_days))
+        .route("/logbook/{date}", get(get_note).delete(delete_note))
         .layer(axum::middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
@@ -231,7 +232,7 @@ async fn create_note(
     State(state): State<AppState>,
     Json(note): Json<NewNoteInput>,
 ) -> Result<Json<&'static str>, StatusCode> {
-    let mut conn = state.pool.get().unwrap();
+    let mut conn = state.pool.get().expect("Cant access database");
 
     let new_note = NewNote {
         user_id: user.id,
@@ -239,10 +240,15 @@ async fn create_note(
         content: note.content,
     };
 
+    println!("Note note: {:?}", new_note);
+
     diesel::insert_into(notes::table)
         .values(&new_note)
         .execute(&mut conn)
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        .map_err(|e| {
+            eprintln!("logbook insert failed: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
 
     Ok(Json("saved"))
 }
@@ -273,7 +279,7 @@ async fn update_note(
 ) -> Result<Json<&'static str>, StatusCode> {
     let mut conn = state.pool.get().unwrap();
 
-    let date = chrono::Utc::now().naive_utc().date();
+    let date = input.note_date;
 
     diesel::update(
         notes::table

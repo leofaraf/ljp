@@ -10,7 +10,7 @@ export default function NotesPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/notes/days`, {
+    fetch(`${import.meta.env.VITE_API_URL}/logbook/days`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => (res.ok ? res.json() : []))
@@ -22,23 +22,23 @@ export default function NotesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Notes</h1>
-      <Button onClick={() => navigate(`/notes/${today}`)}>✍️ Write Today’s Note</Button>
+      <h1 className="text-2xl font-bold mb-4">Logbook</h1>
+      <Button onClick={() => navigate(`/logbook/${today}`)}>Write Today&apos;s Note</Button>
 
       <Card className="mt-6 p-4">
-        <h2 className="text-lg font-semibold mb-3">Days with Notes</h2>
+        <h2 className="text-lg font-semibold mb-3">Days with Logbook Notes</h2>
         {days.length === 0 ? (
-          <p className="text-gray-500">No notes yet.</p>
+          <p className="text-gray-500">No logbook notes yet.</p>
         ) : (
           <ul className="space-y-2">
             {days.map((date) => (
               <li key={date}>
                 <Button
                   variant="outline"
-                  onClick={() => navigate(`/notes/${date}`)}
+                  onClick={() => navigate(`/logbook/${date}`)}
                   className="w-full justify-start"
                 >
-                  🗓️ {date}
+                  Note for {date}
                 </Button>
               </li>
             ))}

@@ -7,6 +7,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    console.log(import.meta.env.VITE_API_URL)
     if (!token) return;
     fetch(`${import.meta.env.VITE_API_URL}/me`, {
       headers: { Authorization: `Bearer ${token}` }

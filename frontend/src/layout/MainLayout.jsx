@@ -12,6 +12,7 @@ export default function MainLayout({ children }) {
     const menu = [
         { name: "Dashboard", path: "/", icon: <Home className="w-4 h-4 mr-2" /> },
         { name: "Overview", path: "/overview", icon: <BarChart3 className="w-4 h-4 mr-2" /> },
+        { name: "Logbook", path: "/logbook", icon: <Notebook className="w-4 h-4 mr-2" /> },
         { name: "Notes", path: "/notes", icon: <Notebook className="w-4 h-4 mr-2" /> },
     ];
 
