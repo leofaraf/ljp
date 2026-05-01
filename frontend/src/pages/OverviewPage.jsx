@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { addDays, format } from "date-fns";
+
 import { useAuth } from "../auth/AuthContext";
-import { format, addDays } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import {
   Select,
@@ -9,27 +11,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
 import { getRange } from "../lib/date";
 
 export default function OverviewPage() {
   const { token } = useAuth();
   const [mode, setMode] = useState("week");
   const [notes, setNotes] = useState([]);
+  const [calendarMonths, setCalendarMonths] = useState(1);
   const [dateRange, setDateRange] = useState({
     from: new Date(),
     to: addDays(new Date(), 7),
   });
 
-  // Update range automatically when mode changes
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 768px)");
+    const updateCalendarMonths = () => setCalendarMonths(query.matches ? 2 : 1);
+
+    updateCalendarMonths();
+    query.addEventListener("change", updateCalendarMonths);
+
+    return () => query.removeEventListener("change", updateCalendarMonths);
+  }, []);
+
   useEffect(() => {
     const [from, to] = getRange(mode);
     setDateRange({ from, to });
   }, [mode]);
 
-  // Fetch and filter logbook entries by date range
   useEffect(() => {
     if (!dateRange.from || !dateRange.to) return;
+
     fetch(`${import.meta.env.VITE_API_URL}/logbook/days`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -54,13 +65,21 @@ export default function OverviewPage() {
       .catch(() => setNotes([]));
   }, [dateRange, token]);
 
+  const rangeFrom = dateRange.from ?? new Date();
+  const rangeTo = dateRange.to ?? dateRange.from ?? new Date();
+
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between mb-4 gap-4">
-        <h1 className="text-2xl font-bold">Overview</h1>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-slate-500">Overview</p>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Logbook activity
+          </h1>
+        </div>
 
         <Select value={mode} onValueChange={setMode}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="h-10 w-full sm:w-48">
             <SelectValue placeholder="Select mode" />
           </SelectTrigger>
           <SelectContent>
@@ -73,34 +92,42 @@ export default function OverviewPage() {
       </div>
 
       {mode === "custom" && (
-        <Card className="p-4 mb-4">
-          <h2 className="text-md font-semibold mb-2">Select Date Range</h2>
-          <Calendar
-            mode="range"
-            numberOfMonths={2}
-            selected={dateRange}
-            onSelect={setDateRange}
-          />
+        <Card className="p-3 sm:p-4">
+          <h2 className="mb-3 text-base font-semibold">Select Date Range</h2>
+          <div className="overflow-x-auto">
+            <Calendar
+              mode="range"
+              numberOfMonths={calendarMonths}
+              selected={dateRange}
+              onSelect={(range) => setDateRange(range ?? {})}
+              className="mx-auto w-fit"
+            />
+          </div>
         </Card>
       )}
 
       <Card className="p-4">
-        <h2 className="text-lg font-semibold mb-2">
-          Logbook ({format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d, yyyy")})
+        <h2 className="text-lg font-semibold">
+          Logbook ({format(rangeFrom, "MMM d")} - {format(rangeTo, "MMM d, yyyy")})
         </h2>
 
         {notes.length === 0 ? (
           <p className="text-gray-500">No logbook entries in this period.</p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {notes.map((note) => (
-              <Card key={note.date} className="p-4 border">
-                <div className="flex justify-between items-center mb-2">
+              <Card
+                key={note.note_date ?? note.date}
+                className="gap-2 border p-4 shadow-none"
+              >
+                <div className="flex items-center justify-between">
                   <span className="font-semibold text-sm text-gray-700">
-                    {note.date}
+                    {note.note_date ?? note.date}
                   </span>
                 </div>
-                <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                <p className="whitespace-pre-wrap break-words text-sm leading-6">
+                  {note.content}
+                </p>
               </Card>
             ))}
           </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
 import { useAuth } from "../auth/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,7 +14,6 @@ export default function EditNotePage() {
   const [loading, setLoading] = useState(true);
   const [exists, setExists] = useState(false);
 
-  // Load existing entry (if any)
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/logbook/${date}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -22,7 +22,7 @@ export default function EditNotePage() {
         if (res.status === 404) {
           setExists(false);
           setLoading(false);
-          return;
+          return null;
         }
         if (!res.ok) throw new Error();
         return res.json();
@@ -63,26 +63,43 @@ export default function EditNotePage() {
     if (res.ok) navigate("/logbook");
   }
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="text-sm text-slate-500">Loading...</p>;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Logbook Notes – {date}</h1>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-slate-500">Logbook</p>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Logbook Notes - {date}
+        </h1>
+      </div>
+
       <Card className="p-4 space-y-4">
         <Textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Write your notes..."
+          className="min-h-[45dvh] resize-y"
           rows={10}
         />
-        <div className="flex gap-2">
-          <Button onClick={handleSave}>{exists ? "Update Note" : "Create Note"}</Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button className="w-full sm:w-auto" onClick={handleSave}>
+            {exists ? "Update Note" : "Create Note"}
+          </Button>
           {exists && (
-            <Button variant="destructive" onClick={handleDelete}>
+            <Button
+              variant="destructive"
+              className="w-full sm:w-auto"
+              onClick={handleDelete}
+            >
               Delete
             </Button>
           )}
-          <Button variant="outline" onClick={() => navigate("/logbook")}>
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => navigate("/logbook")}
+          >
             Back
           </Button>
         </div>

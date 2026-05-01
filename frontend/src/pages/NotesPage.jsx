@@ -21,11 +21,23 @@ export default function NotesPage() {
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Logbook</h1>
-      <Button onClick={() => navigate(`/logbook/${today}`)}>Write Today&apos;s Note</Button>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-slate-500">Logbook</p>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Daily notes
+          </h1>
+        </div>
+        <Button
+          className="w-full sm:w-auto"
+          onClick={() => navigate(`/logbook/${today}`)}
+        >
+          Write Today&apos;s Note
+        </Button>
+      </div>
 
-      <Card className="mt-6 p-4">
+      <Card className="p-4">
         <h2 className="text-lg font-semibold mb-3">Days with Logbook Notes</h2>
         {days.length === 0 ? (
           <p className="text-gray-500">No logbook notes yet.</p>

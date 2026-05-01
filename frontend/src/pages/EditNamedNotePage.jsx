@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
 import { useAuth } from "../auth/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -47,9 +48,7 @@ export default function EditNamedNotePage() {
     const url = exists
       ? `${apiBase}/notes/${encodeURIComponent(decodedName)}`
       : `${apiBase}/notes`;
-    const body = exists
-      ? { content }
-      : { name: decodedName, content };
+    const body = exists ? { content } : { name: decodedName, content };
 
     const res = await fetch(url, {
       method,
@@ -69,37 +68,54 @@ export default function EditNamedNotePage() {
 
   async function handleDelete() {
     if (!window.confirm("Delete this note?")) return;
-    const res = await fetch(
-      `${apiBase}/notes/${encodeURIComponent(decodedName)}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const res = await fetch(`${apiBase}/notes/${encodeURIComponent(decodedName)}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
     if (res.ok) navigate("/notes");
   }
 
-  if (!decodedName) return <p>Missing note name.</p>;
-  if (loading) return <p>Loading...</p>;
+  if (!decodedName) {
+    return <p className="text-sm text-slate-500">Missing note name.</p>;
+  }
+
+  if (loading) return <p className="text-sm text-slate-500">Loading...</p>;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Note: {decodedName}</h1>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-slate-500">Notes</p>
+        <h1 className="break-words text-2xl font-semibold tracking-tight">
+          {decodedName}
+        </h1>
+      </div>
+
       <Card className="p-4 space-y-4">
         <Textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Write your note..."
+          className="min-h-[45dvh] resize-y"
           rows={10}
         />
-        <div className="flex gap-2">
-          <Button onClick={handleSave}>{exists ? "Update" : "Create"}</Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button className="w-full sm:w-auto" onClick={handleSave}>
+            {exists ? "Update" : "Create"}
+          </Button>
           {exists && (
-            <Button variant="destructive" onClick={handleDelete}>
+            <Button
+              variant="destructive"
+              className="w-full sm:w-auto"
+              onClick={handleDelete}
+            >
               Delete
             </Button>
           )}
-          <Button variant="outline" onClick={() => navigate("/notes")}>
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => navigate("/notes")}
+          >
             Back
           </Button>
         </div>

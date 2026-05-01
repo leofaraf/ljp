@@ -34,8 +34,11 @@ export default function NamedNotesPage() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Notes</h1>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-slate-500">Notes</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Named notes</h1>
+      </div>
 
       <Card className="p-4 space-y-3">
         <div className="flex flex-col sm:flex-row gap-2">
@@ -44,14 +47,16 @@ export default function NamedNotesPage() {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
           />
-          <Button onClick={() => goToNote(newName)}>Create / Edit</Button>
+          <Button className="w-full sm:w-auto" onClick={() => goToNote(newName)}>
+            Create / Edit
+          </Button>
         </div>
         <p className="text-sm text-gray-500">
           Creates the note if it does not exist, or opens it if it does.
         </p>
       </Card>
 
-      <Card className="mt-6 p-4">
+      <Card className="p-4">
         <h2 className="text-lg font-semibold mb-3">Your Notes</h2>
         {!Array.isArray(names) || names.length === 0 ? (
           <p className="text-gray-500">No notes yet.</p>
@@ -61,10 +66,10 @@ export default function NamedNotesPage() {
               <li key={name}>
                 <Button
                   variant="outline"
-                  className="w-full justify-start"
+                  className="w-full min-w-0 justify-start"
                   onClick={() => goToNote(name)}
                 >
-                  {name}
+                  <span className="min-w-0 truncate">{name}</span>
                 </Button>
               </li>
             ))}

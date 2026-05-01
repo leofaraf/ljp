@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
@@ -7,8 +8,11 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    console.log(import.meta.env.VITE_API_URL)
-    if (!token) return;
+    if (!token) {
+      setUser(null);
+      return;
+    }
+
     fetch(`${import.meta.env.VITE_API_URL}/me`, {
       headers: { Authorization: `Bearer ${token}` }
     })
